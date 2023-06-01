@@ -35,8 +35,14 @@
   - [Code example](#code-example-2)
   - [Decorators in Java packages](#decorators-in-java-packages)
 - [Chapter 4 : Baking with OO goodness](#chapter-4--baking-with-oo-goodness)
-  - [App](#app)
+  - [Pizzaiolo](#pizzaiolo)
   - [Class diagram of the factory method pattern](#class-diagram-of-the-factory-method-pattern)
+  - [Code example](#code-example-3)
+  - [The abstract factory pattern](#the-abstract-factory-pattern)
+  - [Class diagram of the abstract factory pattern](#class-diagram-of-the-abstract-factory-pattern)
+  - [Code example](#code-example-4)
+- [Chapter 5 : One of a kind objects](#chapter-5--one-of-a-kind-objects)
+  - [xxx](#)
 - [OOP basic principles](#oop-basic-principles)
 - [Design principles list](#design-principles-list)
 - [Design pattern catalog](#design-pattern-catalog)
@@ -908,9 +914,9 @@ _The following isn't an exhaustive list._
 
 ### Pizzaiolo
 
-p 119 simple factory diagram (sf is an idiom not a pattern. Refactoring by encapsulating the instanciation process)
+You are a pizza magnate and have pizza stores all over America which comes with its own set of rules. Each region has its specialty. You need to write code that is flexible enough to answer to this need.
 
-**p 141**
+p 119 simple factory diagram (sf is an idiom not a pattern. Refactoring by encapsulating the instanciation process)
 
 <span class="top-anchor">[⇯](#head-first-design-patterns---my-notes)</span>
 <span class="previous-chapter-anchor">[⇮](#chapter-4--baking-with-oo-goodness)</span>
@@ -926,8 +932,369 @@ p 119 simple factory diagram (sf is an idiom not a pattern. Refactoring by encap
 
 <span class="top-anchor">[⇯](#head-first-design-patterns---my-notes)</span>
 
-<!-- <span class="previous-chapter-anchor">[⇮](#)</span>
-<span class="previous-header-anchor">[⇧](#)</span> -->
+<span class="previous-chapter-anchor">[⇮](#chapter-4--baking-with-oo-goodness)</span>
+<span class="previous-header-anchor">[⇧](#class-diagram-of-the-factory-method-pattern)</span>
+<br/>
+
+### Code example
+
+The creator : PizzaStore.java
+
+```java
+abstract class PizzaStore {
+
+    abstract Pizza createPizza(String item);
+
+    public Pizza orderPizza(String type) {
+        Pizza pizza = createPizza(type);
+        System.out.println("--- Making a " + pizza.getName() + " ---");
+        pizza.prepare();
+        pizza.bake();
+        pizza.cut();
+        pizza.box();
+        return pizza;
+    }
+}
+```
+
+The product : Pizza.java
+
+```java
+import java.util.ArrayList;
+
+abstract class Pizza {
+    String name;
+    String dough;
+    String sauce;
+    ArrayList<String> toppings = new ArrayList<String>();
+
+    void prepare() {
+        System.out.println("Prepare " + name);
+        System.out.println("Tossing dough...");
+        System.out.println("Adding sauce...");
+        System.out.println("Adding toppings: ");
+        for (String topping : toppings) {
+            System.out.println("   " + topping);
+        }
+    }
+
+    void bake() {
+        System.out.println("Bake for 25 minutes at 350");
+    }
+
+    void cut() {
+        System.out.println("Cut the pizza into diagonal slices");
+    }
+
+    void box() {
+        System.out.println("Place pizza in official PizzaStore box");
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String toString() {
+        StringBuffer display = new StringBuffer();
+        display.append("---- " + name + " ----\n");
+        display.append(dough + "\n");
+        display.append(sauce + "\n");
+        for (String topping : toppings) {
+            display.append(topping + "\n");
+        }
+        return display.toString();
+    }
+}
+```
+
+The concrete creator : NYPizzaStore.java
+
+```java
+class NYPizzaStore extends PizzaStore {
+
+	Pizza createPizza(String item) {
+		if (item.equals("cheese")) {
+			return new NYStyleCheesePizza();
+		} else if (item.equals("veggie")) {
+			return new NYStyleVeggiePizza();
+		} else
+			return null;
+	}
+}
+```
+
+The concrete product : NYStyleCheesePizza.java
+
+```java
+class NYStyleCheesePizza extends Pizza {
+
+    public NYStyleCheesePizza() {
+        name = "NY Style Sauce and Cheese Pizza";
+        dough = "Thin Crust Dough";
+        sauce = "Marinara Sauce";
+
+        toppings.add("Grated Reggiano Cheese");
+    }
+}
+```
+
+PizzaTestDrive.java
+
+```java
+class PizzaTestDrive {
+    public static void main(String[] args) {
+        PizzaStore nyStore = new NYPizzaStore();
+        Pizza pizza = nyStore.orderPizza("cheese");
+
+        System.out.println("Ethan ordered a " + pizza.getName() + "\n");
+    }
+}
+```
+
+##### Design principle
+
+> **Depend upon abstractions. Do not depend upon concrete classes.**
+
+### The abstract factory pattern
+
+p 146 You do not have control over the quality of the ingredients. Let's tweak the factory method pattern.
+
+<span class="top-anchor">[⇯](#head-first-design-patterns---my-notes)</span>
+<span class="previous-chapter-anchor">[⇮](#chapter-4--baking-with-oo-goodness)</span>
+<span class="previous-header-anchor">[⇧](#code-example-3)</span>
+<br/>
+
+### Class diagram of the abstract factory pattern
+
+![abstract factory pattern class diagram](abstract_factory_pattern_class_diagram.png)
+
+**The ABSTRACT FACTORY pattern provides an interface for creating families of related or dependent objects without specifying their concrete classes.**
+
+<span class="top-anchor">[⇯](#head-first-design-patterns---my-notes)</span>
+
+<span class="previous-chapter-anchor">[⇮](#chapter-4--baking-with-oo-goodness)</span>
+<span class="previous-header-anchor">[⇧](#class-diagram-of-the-abstract-factory-pattern)</span>
+<br/>
+
+### Code example
+
+PizzaIngredientFactory.java
+
+```java
+interface PizzaIngredientFactory {
+
+    public Dough createDough();
+
+    public Sauce createSauce();
+
+    public Cheese createCheese();
+
+    public Veggies[] createVeggies();
+
+}
+```
+
+NYPizzaIngredientFactory.java
+
+```java
+class NYPizzaIngredientFactory implements PizzaIngredientFactory {
+
+    public Dough createDough() {
+        return new ThinCrustDough();
+    }
+
+    public Sauce createSauce() {
+        return new MarinaraSauce();
+    }
+
+    public Cheese createCheese() {
+        return new ReggianoCheese();
+    }
+
+    public Veggies[] createVeggies() {
+        Veggies veggies[] = { new Garlic(), new Onion(), new Mushroom(), new RedPepper() };
+        return veggies;
+    }
+}
+```
+
+Every ingredient has its interface and concrete class following the same model as Dough and ThinCrustDough :
+
+Dough.java
+
+```java
+interface Dough {
+    public String toString();
+}
+```
+
+ThinCrustDough.java
+
+```java
+class ThinCrustDough implements Dough {
+    public String toString() {
+        return "Thin Crust Dough";
+    }
+}
+```
+
+Some files from the factory method need some changes.
+
+Pizza.java
+
+```java
+abstract class Pizza {
+    String name;
+    Dough dough;
+    Sauce sauce;
+    Veggies veggies[];
+    Cheese cheese;
+
+    abstract void prepare();
+
+    void bake() {
+        System.out.println("Bake for 25 minutes at 350");
+    }
+
+    void cut() {
+        System.out.println("Cutting the pizza into diagonal slices");
+    }
+
+    void box() {
+        System.out.println("Place pizza in official PizzaStore box");
+    }
+
+    void setName(String name) {
+        this.name = name;
+    }
+
+    String getName() {
+        return name;
+    }
+
+    public String toString() {
+        StringBuffer result = new StringBuffer();
+        result.append("---- " + name + " Ingredients ----\n");
+        if (dough != null) {
+            result.append(dough);
+            result.append("\n");
+        }
+        if (sauce != null) {
+            result.append(sauce);
+            result.append("\n");
+        }
+        if (cheese != null) {
+            result.append(cheese);
+            result.append("\n");
+        }
+        if (veggies != null) {
+            for (int i = 0; i < veggies.length; i++) {
+                result.append(veggies[i]);
+                if (i < veggies.length - 1) {
+                    result.append(", ");
+                }
+            }
+            result.append("\n");
+        }
+        return result.toString();
+    }
+}
+```
+
+PizzaStore.java
+
+```java
+abstract class PizzaStore {
+
+    abstract Pizza createPizza(String item);
+
+    public Pizza orderPizza(String type) {
+        Pizza pizza = createPizza(type);
+        System.out.println("--- Making a " + pizza.getName() + " ---");
+        pizza.prepare();
+        System.out.println("\n" + pizza.toString());
+        pizza.bake();
+        pizza.cut();
+        pizza.box();
+        return pizza;
+    }
+}
+```
+
+NYPizzaStore.java
+
+```java
+class NYPizzaStore extends PizzaStore {
+
+	protected Pizza createPizza(String item) {
+		Pizza pizza = null;
+		PizzaIngredientFactory ingredientFactory = new NYPizzaIngredientFactory();
+
+		if (item.equals("cheese")) {
+
+			pizza = new CheesePizza(ingredientFactory);
+			pizza.setName("New York Style Cheese Pizza");
+
+		} else if (item.equals("veggie")) {
+
+			pizza = new VeggiePizza(ingredientFactory);
+			pizza.setName("New York Style Veggie Pizza");
+
+		}
+		return pizza;
+	}
+}
+```
+
+Since we now have regional factories we do not need regional pizzas, just pizzas like a CheesePizza or a VeggiePizza.
+
+CheesePizza.java
+
+```java
+class CheesePizza extends Pizza {
+    PizzaIngredientFactory ingredientFactory;
+
+    public CheesePizza(PizzaIngredientFactory ingredientFactory) {
+        this.ingredientFactory = ingredientFactory;
+    }
+
+    void prepare() {
+        System.out.println("Preparing " + name);
+        dough = ingredientFactory.createDough();
+        sauce = ingredientFactory.createSauce();
+        cheese = ingredientFactory.createCheese();
+    }
+}
+```
+
+<span class="top-anchor">[⇯](#head-first-design-patterns---my-notes)</span>
+
+<span class="previous-chapter-anchor">[⇮](#code-example-4)</span>
+
+<!-- <span class="previous-header-anchor">[⇧](#)</span> -->
+<br/>
+
+## Chapter 5 : One of a kind objects
+
+<!-- (p) -->
+
+### App
+
+<span class="top-anchor">[⇯](#head-first-design-patterns---my-notes)</span>
+<span class="previous-chapter-anchor">[⇮](#chapter-5--one-of-a-kind-objects)</span>
+<span class="previous-header-anchor">[⇧](#chapter-5--one-of-a-kind-objects)</span>
+<br/>
+
+### Class diagram of the singleton pattern
+
+![singleton pattern class diagram](singleton_pattern_class_diagram.png)
+
+**The SINGLETON pattern**
+
+<span class="top-anchor">[⇯](#head-first-design-patterns---my-notes)</span>
+
+<span class="previous-chapter-anchor">[⇮](#chapter-5--one-of-a-kind-objects)</span>
+<span class="previous-header-anchor">[⇧](#class-diagram-of-the-singleton-pattern)</span>
 <br/>
 
 ### Code example
@@ -939,10 +1306,6 @@ class Class {
 
 }
 ```
-
-##### Design principle
-
-> **Depend upon abstractions. Do not depend upon concrete classes.**
 
 <!-- Begin of clone, chapter # : ... -->
 
@@ -1028,6 +1391,10 @@ The **decorator** pattern
 
 - Classes should be open for extension, but closed for modification.
 
+The **factory** pattern
+
+- Depend upon abstractions. Do not depend upon concrete classes.
+
 The **...** pattern
 
 - ...
@@ -1046,11 +1413,11 @@ The **...** pattern
 ### Design pattern catalog
 
 - Creational pattern
-  - Abstract factory
+  - [Abstract factory](#class-diagram-of-the-abstract-factory-pattern)
   - Builder
-  - Factory method
+  - [Factory method](#class-diagram-of-the-factory-method-pattern)
   - Prototype
-  - Singleton
+  - [Singleton](#class-diagram-of-the-singleton-pattern)
 - Structural pattern
   - Adapter
   - Bridge
@@ -1070,5 +1437,3 @@ The **...** pattern
   - [Strategy](#class-diagram-of-the-strategy-pattern)
   - Template method
   - Visitor
-
-stopped at page 67
