@@ -42,7 +42,12 @@
   - [Class diagram of the abstract factory pattern](#class-diagram-of-the-abstract-factory-pattern)
   - [Code example](#code-example-4)
 - [Chapter 5 : One of a kind objects](#chapter-5--one-of-a-kind-objects)
-  - [xxx](#)
+  - [Choc-o-holic](#choc-o-holic)
+  - [Class diagram of the singleton pattern](#class-diagram-of-the-singleton-pattern)
+  - [Code example](#code-example-5)
+  - [ISSUE WITH MULTITHREADS](#issue-with-multithreads)
+  - [Synchronized singleton code example](#synchronized-singleton-code-example)
+  - [Enum singleton code example](#enum-singleton-code-example)
 - [OOP basic principles](#oop-basic-principles)
 - [Design principles list](#design-principles-list)
 - [Design pattern catalog](#design-pattern-catalog)
@@ -1276,9 +1281,9 @@ class CheesePizza extends Pizza {
 
 ## Chapter 5 : One of a kind objects
 
-<!-- (p) -->
+### Choc-o-holic
 
-### App
+You are in charge of coding a computer controlled chocolate boilers for a chocolate bar company.
 
 <span class="top-anchor">[⇯](#head-first-design-patterns---my-notes)</span>
 <span class="previous-chapter-anchor">[⇮](#chapter-5--one-of-a-kind-objects)</span>
@@ -1289,7 +1294,9 @@ class CheesePizza extends Pizza {
 
 ![singleton pattern class diagram](singleton_pattern_class_diagram.png)
 
-**The SINGLETON pattern**
+p 180
+
+**The SINGLETON pattern ensures a class has only one instance, and provides a global point of access to it.**
 
 <span class="top-anchor">[⇯](#head-first-design-patterns---my-notes)</span>
 
@@ -1299,11 +1306,151 @@ class CheesePizza extends Pizza {
 
 ### Code example
 
-Class.java
+ChocolateBoiler.java
 
 ```java
-class Class {
+class ChocolateBoiler {
+	private boolean empty;
+	private boolean boiled;
+	private static ChocolateBoiler uniqueInstance;
 
+	private ChocolateBoiler() {
+		empty = true;
+		boiled = false;
+	}
+
+	public static ChocolateBoiler getInstance() {
+		if (uniqueInstance == null) {
+			System.out.println("Creating unique instance of Chocolate Boiler");
+			uniqueInstance = new ChocolateBoiler();
+		}
+		System.out.println("Returning instance of Chocolate Boiler");
+		return uniqueInstance;
+	}
+
+	public void fill() {
+		if (isEmpty()) {
+			empty = false;
+			boiled = false;
+			// fill the boiler with a milk/chocolate mixture
+		}
+	}
+
+	public void drain() {
+		if (!isEmpty() && isBoiled()) {
+			// drain the boiled milk and chocolate
+			empty = true;
+		}
+	}
+
+	public void boil() {
+		if (!isEmpty() && !isBoiled()) {
+			// bring the contents to a boil
+			boiled = true;
+		}
+	}
+
+	public boolean isEmpty() {
+		return empty;
+	}
+
+	public boolean isBoiled() {
+		return boiled;
+	}
+}
+```
+
+ChocolateController.java
+
+```java
+class ChocolateController {
+	public static void main(String args[]) {
+		ChocolateBoiler boiler = ChocolateBoiler.getInstance();
+		boiler.fill();
+		boiler.boil();
+		boiler.drain();
+
+		// will return the existing instance
+		ChocolateBoiler boiler2 = ChocolateBoiler.getInstance();
+	}
+}
+```
+
+<span class="top-anchor">[⇯](#head-first-design-patterns---my-notes)</span>
+
+<span class="previous-chapter-anchor">[⇮](#chapter-5--one-of-a-kind-objects)</span>
+<span class="previous-header-anchor">[⇧](#code-example-5)</span>
+<br/>
+
+### ISSUE WITH MULTITHREADS
+
+> The code as it is now, is open to the risk of having multiple instances (an invoke of getInstance() on different threads).
+
+There are multiple ways to address this problem.
+
+1. The _synchronized_ keyword can be ensure to be thread-safe, however it is performance consuming.
+2. One can also eagerly create an instance. If it is known that the singleton will be used at some point, it can be a solution.
+3. Using the "double-checked locking". It uses in concert the _synchronized_ and _volatile_ keywords. It also comes with a warning on performance and a check of Java version.
+4. For modern Java versions (starting from Java 5), the use of _enum_ provides a concise and efficient solution for implementing a Singleton pattern, as enum instances are inherently thread-safe and cannot be instantiated more than once.
+
+Here are the code examples of the first and last solutions.
+
+<span class="top-anchor">[⇯](#head-first-design-patterns---my-notes)</span>
+
+<span class="previous-chapter-anchor">[⇮](#chapter-5--one-of-a-kind-objects)</span>
+<span class="previous-header-anchor">[⇧](#issue-with-multithreads)</span>
+<br/>
+
+### Synchronized singleton code example
+
+Singleton.java
+
+```java
+class Singleton {
+	private static Singleton uniqueInstance;
+
+	// other useful instance variables here
+
+	private Singleton() {}
+
+	public static synchronized Singleton getInstance() {
+		if (uniqueInstance == null) {
+			uniqueInstance = new Singleton();
+		}
+		return uniqueInstance;
+	}
+
+	// other useful methods here
+}
+```
+
+<span class="top-anchor">[⇯](#head-first-design-patterns---my-notes)</span>
+
+<span class="previous-chapter-anchor">[⇮](#chapter-5--one-of-a-kind-objects)</span>
+<span class="previous-header-anchor">[⇧](#synchronized-singleton-code-example)</span>
+<br/>
+
+### Enum singleton code example
+
+Singleton.java
+
+```java
+enum Singleton {
+    UNIQUE_INSTANCE;
+
+    // other useful fields here
+
+    // other useful methods here
+}
+```
+
+SingletonClient.java
+
+```java
+class SingletonClient {
+    public static void main(String[] args) {
+        Singleton singleton = Singleton.UNIQUE_INSTANCE;
+    }
 }
 ```
 
@@ -1317,9 +1464,9 @@ class Class {
 
 ## Chapter # : ...
 
-<!-- (p) -->
-
 ### App
+
+<!-- (p) -->
 
 <span class="top-anchor">[⇯](#head-first-design-patterns---my-notes)</span>
 
